@@ -1,0 +1,116 @@
+personal:
+  name: N R Partheev Sai
+  degree: Computer Science & Engineering
+  college: Amrita School of Engineering
+  phone: 8374996878
+  email: nrpartheevsai@gmail.com
+  linkedin:
+    text: LinkedIn
+    url: https://www.linkedin.com/in/nutanapati-ramappagari-partheev-sai/
+  youtube:
+    text: YouTube
+    url: https://www.youtube.com/@partheevcapturestheflag
+
+education:
+  - qualification: B.Tech (Graduation)
+    university: Amrita School of Engineering
+    year: 2020-2024
+    cgpa: 9.2
+  - qualification: Intermediate (12th Grade)
+    university: Sri Chaitanya College
+    year: 2018-2020
+    cgpa: 96.7%
+
+summary: >
+  Software engineer with strong command over add all the things required by the job here
+
+tech_skills:
+  - category: Development
+    skills:
+      - Python
+      - C/C++
+      - Java
+
+  - category: Web Development
+    skills:
+      - React.js
+      - React Native
+      - Redux
+      - React Navigation
+      - ExpressJS
+      - MongoDB
+      - MySQL
+      - Flask
+      - JavaScript
+      - TypeScript
+
+  - category: DevOps
+    skills:
+      - Git
+      - Docker
+      - Jenkins
+      - GitLab
+      - CI/CD
+
+  - category: Cloud & Security
+    skills:
+      - AWS 
+      - Penetration Testing
+      - Ethical Hacking
+
+achievements:
+  - Web team lead for a top 10 CTF team in India (bi0sblr)
+  - Ranked 5th in CSE 2024 batch
+  - Won $1000+ in cash prizes across multiple CTF competitions
+  - 
+
+experience:
+  - company: Amazon
+    role: Software Application Engineer
+    duration: Aug 2025 – Present
+    points:
+      - Maintained and optimized CI/CD pipelines across multiple environments
+      - Developed automation scripts to streamline operational workflows
+      - Monitored host and service metrics to identify performance bottlenecks
+      - Resolved AWS cloud and dependency-related security vulnerabilities
+      - Worked on internal package migrations and dependency upgrades
+
+projects:
+  - title: VARCian
+    tech:
+      - React Native
+      - ExpressJS
+      - AI (RAG Model)
+      - Node.js
+    points:
+      - Built a cross-platform Reading Comprehension testing app
+      - AI generates a new RC every hour with backend caching
+      - Implemented secure answer validation through backend-only logic
+      - Categorized RCs using a RAG model based on user preferences
+
+  - title: Scam APK Reverse Engineering
+    tech:
+      - Android Reverse Engineering
+      - Firebase
+      - Security Analysis
+    link: https://www.youtube.com/watch?v=yOANgy5w5Ng&t=1s
+    points:
+      - Reverse engineered a scam APK to analyze internal logic
+      - Identified security vulnerabilities in Firebase usage
+      - Documented exploit paths and insecure implementations
+
+  - title: ITHIHAAS Spiritual and Educational Trust Website
+    tech:
+      - ReactJS
+      - ExpressJS
+      - MongoDB
+      - Razorpay
+      - Cloudflare
+      - Twilio
+      - Redis
+    link: https://ithihaas.in/
+    points:
+      - Developed a full-stack multilingual web application
+      - Integrated secure payment gateway with Razorpay
+      - Implemented OTP authentication using Twilio and Redis caching
+      - Applied Cloudflare WAF rules for enhanced security
