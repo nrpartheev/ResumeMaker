@@ -8,7 +8,7 @@ import re
 # -----------------------------
 # CONFIG
 # -----------------------------
-API_KEY = "AIzaSyAZ7JTyXV0PcNFVJCTu3dE8zfa9Kmyt_1c"
+API_KEY = "-- placeholder --"
 TEMPLATE_FILE = "template.html"
 OUTPUT_PDF = "output.pdf"
 
