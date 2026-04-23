@@ -4,3 +4,5 @@ outputs
 uploads
 */__pycache__
 static
+.DS_Store
+.env

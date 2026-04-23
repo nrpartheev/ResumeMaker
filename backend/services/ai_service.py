@@ -51,13 +51,7 @@ def generate_typst(about, template_id, jd):
     )
 
     typst_output = response.choices[0].message.content
-
-    output_path = "outputs/output.typ"
-
-    with open(output_path, "w") as f:
-        f.write(typst_output)
-
-    return output_path
+    return typst_output
 
 
 # ----------------------------
@@ -98,3 +92,24 @@ def structure_resume_data(raw_text):
             "structured_data": {},
             "warnings": [f"AI parsing failed: {str(e)}"]
         }
+
+def change_typst(change, typst ):
+    client = get_client()
+
+    with open("prompts/changer.txt", "r", encoding="utf-8") as f:
+        prompt = f.read()
+
+    
+    prompt = prompt + "Change: " + change + "typst: " +  typst
+
+
+    response = client.chat.completions.create(
+        model="openrouter/auto",  
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7
+    )
+
+    typst_output = response.choices[0].message.content
+    return typst_output
