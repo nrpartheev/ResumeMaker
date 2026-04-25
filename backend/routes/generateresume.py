@@ -25,11 +25,16 @@ def generate_resume():
         try:
             typst_output = generate_typst(
                 about_text,
-                template_id, 
-                jd
+                template_id,
+                jd,
             )
-            break 
-
+            break
+        except RuntimeError as e:
+            # Typst validation/fix loop exhausted. This is a user-facing 422, not a server crash.
+            return jsonify({
+                "error": "Failed to generate a valid Typst resume.",
+                "details": str(e),
+            }), 422
         except Exception as e:
             last_exception = e
 
@@ -59,10 +64,14 @@ def change_resume():
         try:
             typst_output = change_typst(
                 change,
-                typst
+                typst,
             )
-            break 
-
+            break
+        except RuntimeError as e:
+            return jsonify({
+                "error": "Failed to generate a valid Typst resume.",
+                "details": str(e),
+            }), 422
         except Exception as e:
             last_exception = e
 
