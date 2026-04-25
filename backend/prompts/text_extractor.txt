@@ -21,6 +21,7 @@ Rules:
   → structured_data = ""
 - Don't assume any personal data that is not provided
 - Extract only resume-related fields
+- Assosiate links to the correct project/profile based on the data provided
 - Keep arrays clean
 - Do NOT hallucinate missing data
 - Return VALID JSON ONLY
