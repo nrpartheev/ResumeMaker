@@ -9,6 +9,7 @@
  *   1. Set `main` to the SSR server entry (../server/server.js)
  *   2. Fix the `name` to match the Cloudflare project name
  *   3. Ensure assets directory is correct
+ *   4. Add nodejs_compat flag (required for node:async_hooks, node:stream, etc.)
  */
 
 import { readFileSync, writeFileSync } from "fs";
@@ -31,6 +32,11 @@ config.name = "resumemaker";
 config.main = "../server/server.js";
 config.assets = { directory: "." };
 
+// Required for node:async_hooks, node:stream, node:stream/web used by TanStack Start SSR
+config.compatibility_flags = [
+  ...new Set([...(config.compatibility_flags ?? []), "nodejs_compat"]),
+];
+
 // Remove keys that conflict with Worker mode
 delete config.topLevelName;
 delete config.dev;
@@ -40,3 +46,4 @@ console.log("patch-wrangler: patched dist/client/wrangler.json ✓");
 console.log("  name:", config.name);
 console.log("  main:", config.main);
 console.log("  assets.directory:", config.assets.directory);
+console.log("  compatibility_flags:", config.compatibility_flags);
