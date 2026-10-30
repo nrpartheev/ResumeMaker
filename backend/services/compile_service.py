@@ -13,6 +13,7 @@ PDFLATEX_ARGS = [
     "-interaction=nonstopmode",
     "-halt-on-error",
     "-file-line-error",
+    "-no-shell-escape",   # disables \write18 — prevents shell injection via LaTeX source
     "main.tex",
 ]
 

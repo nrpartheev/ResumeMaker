@@ -92,7 +92,9 @@ def auth_google_callback():
         return redirect(f"{config.FRONTEND_URL}/auth/callback?error=db_error")
 
     token = mint_jwt(user_doc)
-    return redirect(f"{config.FRONTEND_URL}/auth/callback?token={token}")
+    # Pass the token as a URL fragment so it never appears in server logs,
+    # browser history, or Referer headers.
+    return redirect(f"{config.FRONTEND_URL}/auth/callback#token={token}")
 
 
 @bp.post("/logout")
