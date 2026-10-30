@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Basic Resume",
+    "image": "basic.png",
+    "file": "basic.tex"
+  },
+  {
+    "name": "RenderCV",
+    "image": "rendercv.png",
+    "file": "rendercv.tex"
+  }
+]
