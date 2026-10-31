@@ -3,6 +3,7 @@ import { Loader2, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+import { API_BASE, auth } from "@/lib/api";
 
 // Point react-pdf at the bundled worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -11,35 +12,33 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 // ---------------------------------------------------------------------------
-// Siglum client-side LaTeX compilation (TeX Live 2025 in WASM)
-// https://github.com/SiglumProject/siglum
+// Server-side compilation via tectonic on Render
 // ---------------------------------------------------------------------------
 
-import { SiglumCompiler } from "@siglum/engine";
+async function compileOnServer(latex: string): Promise<Blob> {
+  const token = auth.get();
+  const res = await fetch(`${API_BASE}/compile`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ latex }),
+  });
 
-let compilerPromise: Promise<SiglumCompiler> | null = null;
-
-async function getCompiler(): Promise<SiglumCompiler> {
-  if (compilerPromise) return compilerPromise;
-  compilerPromise = (async () => {
-    const compiler = new SiglumCompiler({
-      // Use the public CDN — no self-hosting required
-      bundlesUrl: "https://cdn.siglum.org/tl2025/bundles",
-      wasmUrl: "https://cdn.siglum.org/tl2025/busytex.wasm",
-    });
-    await compiler.init();
-    return compiler;
-  })();
-  return compilerPromise;
-}
-
-async function compileClientSide(latex: string): Promise<Blob> {
-  const compiler = await getCompiler();
-  const result = await compiler.compile(latex, { engine: "pdflatex" });
-  if (result.success && result.pdf) {
-    return new Blob([result.pdf as BlobPart], { type: "application/pdf" });
+  if (!res.ok) {
+    let log = `Server error ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body?.log) log = body.log;
+      else if (body?.error) log = body.error;
+    } catch {
+      // ignore
+    }
+    throw new Error(log);
   }
-  throw new Error(result.log?.slice(-2000) || result.error || "Compilation failed");
+
+  return res.blob();
 }
 
 // ---------------------------------------------------------------------------
@@ -56,7 +55,6 @@ export function PdfPreview({ latex }: { latex: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Track container width so the PDF page scales to fit
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
@@ -67,7 +65,6 @@ export function PdfPreview({ latex }: { latex: string }) {
     return () => observer.disconnect();
   }, []);
 
-  // Compile on latex change (debounced)
   useEffect(() => {
     if (!latex.trim()) {
       setPdfBlob(null);
@@ -81,7 +78,7 @@ export function PdfPreview({ latex }: { latex: string }) {
       let cancelled = false;
       setStatus("compiling");
 
-      compileClientSide(latex)
+      compileOnServer(latex)
         .then((blob) => {
           if (cancelled) return;
           setPdfBlob(blob);
@@ -106,10 +103,6 @@ export function PdfPreview({ latex }: { latex: string }) {
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
   }, []);
-
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
 
   if (status === "error") {
     return (
@@ -138,14 +131,12 @@ export function PdfPreview({ latex }: { latex: string }) {
 
   return (
     <div className="relative flex h-full flex-col bg-muted/40">
-      {/* Recompiling overlay badge */}
       {status === "compiling" && pdfBlob && (
         <div className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-background/90 px-2 py-1 text-xs text-muted-foreground shadow backdrop-blur">
           <Loader2 className="h-3 w-3 animate-spin" /> Recompiling
         </div>
       )}
 
-      {/* Full-height spinner while first compile in flight */}
       {status === "compiling" && !pdfBlob && (
         <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -153,7 +144,6 @@ export function PdfPreview({ latex }: { latex: string }) {
         </div>
       )}
 
-      {/* PDF canvas — fills the container, no browser chrome */}
       {pdfBlob && (
         <>
           <div
@@ -178,7 +168,6 @@ export function PdfPreview({ latex }: { latex: string }) {
             </Document>
           </div>
 
-          {/* Page navigation — only shown for multi-page PDFs */}
           {numPages > 1 && (
             <div className="flex items-center justify-center gap-3 border-t border-border bg-card py-2 text-sm text-muted-foreground">
               <button
@@ -189,9 +178,7 @@ export function PdfPreview({ latex }: { latex: string }) {
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              <span>
-                {page} / {numPages}
-              </span>
+              <span>{page} / {numPages}</span>
               <button
                 onClick={() => setPage((p) => Math.min(numPages, p + 1))}
                 disabled={page >= numPages}
@@ -207,10 +194,6 @@ export function PdfPreview({ latex }: { latex: string }) {
     </div>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Hook: .tex download blob URL (used by Studio toolbar)
-// ---------------------------------------------------------------------------
 
 export function useLatexBlobUrl(latex: string) {
   const [url, setUrl] = useState<string>("");
