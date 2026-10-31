@@ -2,7 +2,6 @@
 set -e
 
 # Download tectonic (single-binary LaTeX engine) to bin/
-# This avoids needing apt-get (which Render's Python env doesn't allow)
 # Tectonic downloads LaTeX packages on demand at compile time.
 
 echo "Installing tectonic..."
@@ -19,13 +18,31 @@ else
     exit 1
 fi
 
-TECTONIC_URL="https://github.com/tectonic-typesetting/tectonic/releases/latest/download/tectonic-${TECTONIC_ARCH}.tar.gz"
+# The "continuous" release tag has versioned filenames, so we use the GitHub API
+# to find the correct asset URL.
+echo "Fetching download URL from GitHub API..."
+DOWNLOAD_URL=$(curl -sL "https://api.github.com/repos/tectonic-typesetting/tectonic/releases" | \
+    python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for release in data:
+    for a in release.get('assets', []):
+        if '${TECTONIC_ARCH}' in a['name'] and a['name'].endswith('.tar.gz'):
+            print(a['browser_download_url'])
+            sys.exit(0)
+print('NOT_FOUND')
+" 2>/dev/null)
 
-echo "Downloading from $TECTONIC_URL"
-curl -L "$TECTONIC_URL" | tar xz -C bin
+if [ "$DOWNLOAD_URL" = "NOT_FOUND" ] || [ -z "$DOWNLOAD_URL" ]; then
+    echo "Failed to find tectonic binary for ${TECTONIC_ARCH}"
+    exit 1
+fi
+
+echo "Downloading from $DOWNLOAD_URL"
+curl -L "$DOWNLOAD_URL" | tar xz -C bin
 
 chmod +x bin/tectonic
-echo "Tectonic installed at bin/tectonic"
+echo "Tectonic installed at $(pwd)/bin/tectonic"
 bin/tectonic --version
 
 # Install Python dependencies
