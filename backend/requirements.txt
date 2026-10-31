@@ -7,3 +7,4 @@ pymongo>=4.7.0
 openai>=1.0.0
 PyMuPDF>=1.23.0
 gunicorn>=21.2.0
+gevent>=24.2.1
