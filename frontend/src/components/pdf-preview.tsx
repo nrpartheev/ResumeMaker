@@ -11,58 +11,35 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 // ---------------------------------------------------------------------------
-// SwiftLaTeX client-side compilation (WASM PdfTeX engine)
+// WasmTex client-side compilation (pdfLaTeX in browser via WASM)
 // ---------------------------------------------------------------------------
 
-declare global {
-  interface Window {
-    PdfTeXEngine?: new () => PdfTeXEngineInstance;
-  }
-}
+import { WasmTexCompiler } from "wasmtex/headless";
 
-type PdfTeXEngineInstance = {
-  loadEngine: () => Promise<void>;
-  writeMemFSFile: (filename: string, content: string) => void;
-  setEngineMainFile: (filename: string) => void;
-  compileLaTeX: () => Promise<{ pdf?: Uint8Array; status: number; log: string }>;
-  flushCache: () => void;
-  closeWorker?: () => void;
-};
+let compilerPromise: Promise<InstanceType<typeof WasmTexCompiler>> | null = null;
 
-// Pinned to a specific commit for reliability
-const SWIFTLATEX_SRC = "https://cdn.jsdelivr.net/gh/SwiftLaTeX/SwiftLaTeX@v0.5.0/PdfTeXEngine.js";
-
-let enginePromise: Promise<PdfTeXEngineInstance> | null = null;
-
-async function getEngine(): Promise<PdfTeXEngineInstance> {
-  if (enginePromise) return enginePromise;
-  enginePromise = (async () => {
-    if (!window.PdfTeXEngine) {
-      await new Promise<void>((resolve, reject) => {
-        const s = document.createElement("script");
-        s.src = SWIFTLATEX_SRC;
-        s.onload = () => resolve();
-        s.onerror = () => reject(new Error("Failed to load SwiftLaTeX engine"));
-        document.head.appendChild(s);
-      });
-    }
-    if (!window.PdfTeXEngine) throw new Error("SwiftLaTeX engine unavailable");
-    const engine = new window.PdfTeXEngine();
-    await engine.loadEngine();
-    return engine;
+async function getCompiler(): Promise<InstanceType<typeof WasmTexCompiler>> {
+  if (compilerPromise) return compilerPromise;
+  compilerPromise = (async () => {
+    const compiler = new WasmTexCompiler({
+      assetBaseUrl: "/",
+      texliveVersion: "2025",
+      files: {},
+    });
+    await compiler.init();
+    return compiler;
   })();
-  return enginePromise;
+  return compilerPromise;
 }
 
 async function compileClientSide(latex: string): Promise<Blob> {
-  const engine = await getEngine();
-  engine.writeMemFSFile("main.tex", latex);
-  engine.setEngineMainFile("main.tex");
-  const result = await engine.compileLaTeX();
-  if (result.status === 0 && result.pdf) {
+  const compiler = await getCompiler();
+  await compiler.loadProject({ "main.tex": latex });
+  const result = await compiler.compile();
+  if (result.success && result.pdf) {
     return new Blob([result.pdf as BlobPart], { type: "application/pdf" });
   }
-  throw new Error(result.log?.slice(-2000) || "Compilation failed");
+  throw new Error(result.log?.slice(-2000) || result.errors?.join("\n") || "Compilation failed");
 }
 
 // ---------------------------------------------------------------------------

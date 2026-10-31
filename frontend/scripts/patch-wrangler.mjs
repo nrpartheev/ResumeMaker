@@ -1,22 +1,22 @@
 /**
  * patch-wrangler.mjs
  *
- * Runs after `vite build`. The @cloudflare/vite-plugin generates a
- * dist/client/wrangler.json that has no `main` field (assets-only mode),
- * which causes every route to 404 on Cloudflare Workers.
- *
- * This script patches the generated wrangler.json to:
- *   1. Set `main` to the SSR server entry (../server/server.js)
- *   2. Fix the `name` to match the Cloudflare project name
- *   3. Ensure assets directory is correct
- *   4. Add nodejs_compat flag (required for node:async_hooks, node:stream, etc.)
+ * Runs after `vite build`:
+ * 1. Patches the generated wrangler.json to wire SSR server entry + nodejs_compat
+ * 2. Downloads WasmTex engine assets to dist/client/wasmtex/ for static serving
  */
 
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { execSync } from "child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// ---------------------------------------------------------------------------
+// 1. Patch wrangler.json
+// ---------------------------------------------------------------------------
+
 const wranglerPath = resolve(__dirname, "../dist/client/wrangler.json");
 
 let config;
@@ -27,23 +27,41 @@ try {
   process.exit(1);
 }
 
-// Patch the config
 config.name = "resumemaker";
 config.main = "../server/server.js";
 config.assets = { directory: "." };
-
-// Required for node:async_hooks, node:stream, node:stream/web used by TanStack Start SSR
 config.compatibility_flags = [
   ...new Set([...(config.compatibility_flags ?? []), "nodejs_compat"]),
 ];
-
-// Remove keys that conflict with Worker mode
 delete config.topLevelName;
 delete config.dev;
 
 writeFileSync(wranglerPath, JSON.stringify(config, null, 2));
 console.log("patch-wrangler: patched dist/client/wrangler.json ✓");
-console.log("  name:", config.name);
-console.log("  main:", config.main);
-console.log("  assets.directory:", config.assets.directory);
-console.log("  compatibility_flags:", config.compatibility_flags);
+
+// ---------------------------------------------------------------------------
+// 2. Ensure wasmtex assets are in dist/client/wasmtex/2025/
+//    Vite copies from public/ automatically, but verify they exist.
+//    If missing (e.g. fresh clone without public/wasmtex), download them.
+// ---------------------------------------------------------------------------
+
+const destAssets = resolve(__dirname, "../dist/client/wasmtex/2025");
+
+if (!existsSync(destAssets) || !existsSync(resolve(destAssets, "manifest.json"))) {
+  console.log("patch-wrangler: wasmtex assets missing, downloading...");
+  mkdirSync(destAssets, { recursive: true });
+  try {
+    execSync(
+      `git clone --depth 1 https://github.com/corca-ai/wasmtex.git /tmp/wasmtex-clone && ` +
+      `cd /tmp/wasmtex-clone && ` +
+      `node scripts/sync-engine-assets.mjs --from https://corca-ai.github.io/wasmtex/ --version 2025 --dest ${destAssets}`,
+      { stdio: "inherit", timeout: 180000 }
+    );
+    console.log("patch-wrangler: wasmtex assets downloaded ✓");
+  } catch (e) {
+    console.error("patch-wrangler: failed to download wasmtex assets");
+    console.error("  LaTeX compilation will not work without these assets.");
+  }
+} else {
+  console.log("patch-wrangler: wasmtex assets already present ✓");
+}

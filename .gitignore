@@ -27,6 +27,9 @@ node_modules/
 frontend/dist/
 frontend/.wrangler/
 
+# WasmTex engine assets (downloaded during build, ~26MB)
+frontend/public/wasmtex/
+
 # Editor
 .vscode/
 .idea/
