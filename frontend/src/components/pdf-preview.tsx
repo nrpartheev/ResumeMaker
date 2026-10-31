@@ -3,7 +3,6 @@ import { Loader2, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { API_BASE, auth } from "@/lib/api";
 
 // Point react-pdf at the bundled worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -12,33 +11,58 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 // ---------------------------------------------------------------------------
-// Server compilation
+// SwiftLaTeX client-side compilation (WASM PdfTeX engine)
 // ---------------------------------------------------------------------------
 
-async function compileOnServer(latex: string): Promise<Blob> {
-  const token = auth.get();
-  const res = await fetch(`${API_BASE}/compile`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ latex }),
-  });
-
-  if (!res.ok) {
-    let log = `Server error ${res.status}`;
-    try {
-      const body = await res.json();
-      if (body?.log) log = body.log;
-      else if (body?.error) log = body.error;
-    } catch {
-      // ignore
-    }
-    throw new Error(log);
+declare global {
+  interface Window {
+    PdfTeXEngine?: new () => PdfTeXEngineInstance;
   }
+}
 
-  return res.blob();
+type PdfTeXEngineInstance = {
+  loadEngine: () => Promise<void>;
+  writeMemFSFile: (filename: string, content: string) => void;
+  setEngineMainFile: (filename: string) => void;
+  compileLaTeX: () => Promise<{ pdf?: Uint8Array; status: number; log: string }>;
+  flushCache: () => void;
+  closeWorker?: () => void;
+};
+
+// Pinned to a specific commit for reliability
+const SWIFTLATEX_SRC = "https://cdn.jsdelivr.net/gh/SwiftLaTeX/SwiftLaTeX@v0.5.0/PdfTeXEngine.js";
+
+let enginePromise: Promise<PdfTeXEngineInstance> | null = null;
+
+async function getEngine(): Promise<PdfTeXEngineInstance> {
+  if (enginePromise) return enginePromise;
+  enginePromise = (async () => {
+    if (!window.PdfTeXEngine) {
+      await new Promise<void>((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = SWIFTLATEX_SRC;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error("Failed to load SwiftLaTeX engine"));
+        document.head.appendChild(s);
+      });
+    }
+    if (!window.PdfTeXEngine) throw new Error("SwiftLaTeX engine unavailable");
+    const engine = new window.PdfTeXEngine();
+    await engine.loadEngine();
+    return engine;
+  })();
+  return enginePromise;
+}
+
+async function compileClientSide(latex: string): Promise<Blob> {
+  const engine = await getEngine();
+  engine.writeMemFSFile("main.tex", latex);
+  engine.setEngineMainFile("main.tex");
+  const result = await engine.compileLaTeX();
+  if (result.status === 0 && result.pdf) {
+    return new Blob([result.pdf as BlobPart], { type: "application/pdf" });
+  }
+  throw new Error(result.log?.slice(-2000) || "Compilation failed");
 }
 
 // ---------------------------------------------------------------------------
@@ -80,7 +104,7 @@ export function PdfPreview({ latex }: { latex: string }) {
       let cancelled = false;
       setStatus("compiling");
 
-      compileOnServer(latex)
+      compileClientSide(latex)
         .then((blob) => {
           if (cancelled) return;
           setPdfBlob(blob);
