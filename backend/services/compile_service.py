@@ -68,10 +68,14 @@ def compile_latex(latex_source: str) -> bytes:
         # Build the command — tectonic and pdflatex have different argument styles
         if "tectonic" in engine_path:
             # tectonic main.tex --outdir <tmpdir> --keep-logs
+            # Set cache dir to project dir so packages persist across requests
+            cache_dir = Path(__file__).parent.parent / ".tectonic-cache"
+            cache_dir.mkdir(exist_ok=True)
             cmd = [engine_path] + engine_args + [
                 str(tex_path),
                 "--outdir", tmpdir,
                 "--keep-logs",
+                "-c", str(cache_dir),
             ]
         else:
             # pdflatex
