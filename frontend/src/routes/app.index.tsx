@@ -28,7 +28,7 @@ function AppIndex() {
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center p-8">
+    <div className="flex h-full flex-col items-center justify-center p-4 md:p-8">
       <motion.div
         initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
         className="max-w-md text-center"
@@ -36,7 +36,7 @@ function AppIndex() {
         <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-accent/15 text-accent">
           <Sparkles className="h-5 w-5" />
         </div>
-        <h1 className="mt-5 font-display text-3xl tracking-tight">Start a new résumé</h1>
+        <h1 className="mt-5 font-display text-2xl tracking-tight md:text-3xl">Start a new résumé</h1>
         <p className="mt-2 text-sm text-muted-foreground">Pick a template, optionally tailor to a job description, and we'll draft your résumé.</p>
         <button
           onClick={() => setOpen(true)}

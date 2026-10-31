@@ -20,7 +20,7 @@ function Landing() {
 
   return (
     <div className="grain min-h-screen overflow-hidden">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 md:px-6 md:py-6">
         <Link to="/" className="flex items-center gap-2">
           <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent" />
           <span className="font-display text-lg tracking-tight">Résumé Lab</span>
@@ -34,7 +34,7 @@ function Landing() {
         )}
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 pb-32 pt-16 md:pt-28">
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-12 md:px-6 md:pb-32 md:pt-16 lg:pt-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -45,17 +45,17 @@ function Landing() {
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
             Résumés, made effortless
           </span>
-          <h1 className="mt-6 font-display text-5xl leading-[1.05] tracking-tight md:text-7xl">
+          <h1 className="mt-6 font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
             Your résumé,
             <br />
             <span className="italic text-muted-foreground">tailored</span> to every role.
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
+          <p className="mt-5 max-w-xl text-base text-muted-foreground md:mt-6 md:text-lg">
             Pick a template. Paste a job description. Watch your résumé reshape itself —
             then edit code or PDF, side by side.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="mt-8 flex flex-wrap items-center gap-4 md:mt-10">
             <a
               href={googleLoginUrl()}
               className="group inline-flex items-center gap-3 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90"
@@ -72,16 +72,16 @@ function Landing() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-24 grid gap-6 md:grid-cols-3"
+          className="mt-16 grid gap-4 sm:gap-6 md:mt-24 md:grid-cols-3"
         >
           {[
             { k: "01", t: "Templates that don't look templated", d: "Clean HTML and CSS. ATS-friendly. Editorially calm." },
             { k: "02", t: "Tailor to any JD", d: "Paste the job description. Get a draft tuned to its language." },
             { k: "03", t: "Code or PDF — your call", d: "An island toggle flips between an editor and the live PDF." },
           ].map((f) => (
-            <div key={f.k} className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+            <div key={f.k} className="rounded-2xl border border-border bg-card p-5 shadow-soft md:p-6">
               <div className="font-mono text-xs text-muted-foreground">{f.k}</div>
-              <h3 className="mt-3 font-display text-xl">{f.t}</h3>
+              <h3 className="mt-3 font-display text-lg md:text-xl">{f.t}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{f.d}</p>
             </div>
           ))}

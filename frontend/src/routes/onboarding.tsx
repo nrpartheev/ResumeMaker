@@ -67,20 +67,20 @@ function Onboarding() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-16">
+    <main className="mx-auto max-w-2xl px-4 py-8 md:px-6 md:py-16">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <h1 className="font-display text-4xl tracking-tight">Welcome.</h1>
-        <p className="mt-3 text-muted-foreground">
+        <h1 className="font-display text-3xl tracking-tight md:text-4xl">Welcome.</h1>
+        <p className="mt-3 text-sm text-muted-foreground md:text-base">
           Help us bootstrap your profile. Upload an old résumé, or just tell us about yourself —
           we'll structure the rest.
         </p>
 
-        <div className="mt-8 inline-flex rounded-full border border-border bg-card p-1 text-sm">
+        <div className="mt-6 inline-flex rounded-full border border-border bg-card p-1 text-sm md:mt-8">
           {(["text", "upload"] as const).map((m) => (
             <button
               key={m}
               onClick={() => setMode(m)}
-              className={`rounded-full px-4 py-1.5 transition ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              className={`rounded-full px-3 py-1.5 text-xs transition md:px-4 md:text-sm ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
               {m === "text" ? "Write a summary" : "Upload résumé"}
             </button>
@@ -93,10 +93,10 @@ function Onboarding() {
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               placeholder="I'm a senior backend engineer with 6 years building distributed systems at..."
-              className="min-h-[220px] w-full rounded-2xl border border-border bg-card p-4 text-sm outline-none focus:ring-2 focus:ring-ring"
+              className="min-h-[180px] w-full rounded-2xl border border-border bg-card p-4 text-sm outline-none focus:ring-2 focus:ring-ring md:min-h-[220px]"
             />
           ) : (
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card p-10 text-sm text-muted-foreground hover:bg-secondary">
+            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card p-6 text-sm text-muted-foreground hover:bg-secondary md:p-10">
               <input
                 type="file"
                 accept=".pdf,.doc,.docx,.txt,.html,.htm"
@@ -108,7 +108,7 @@ function Onboarding() {
               ) : (
                 <>
                   <span className="font-medium text-foreground">Drop your résumé here</span>
-                  <span>PDF, DOCX, TXT or TEX</span>
+                  <span>PDF, DOCX, TXT or HTML</span>
                 </>
               )}
             </label>
@@ -118,7 +118,7 @@ function Onboarding() {
         <button
           onClick={submit}
           disabled={submitting}
-          className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground disabled:opacity-50"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground disabled:opacity-50 md:mt-8"
         >
           {submitting ? "Creating…" : "Create profile →"}
         </button>

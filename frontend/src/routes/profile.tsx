@@ -56,13 +56,13 @@ function ProfilePage() {
   const otherEntries = allEntries.filter(([k]) => !KNOWN.has(k));
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12 pb-40">
-      <h1 className="font-display text-4xl tracking-tight">Your profile</h1>
-      <p className="mt-2 text-muted-foreground">
+    <main className="mx-auto max-w-3xl px-4 py-8 pb-32 md:px-6 md:py-12 md:pb-40">
+      <h1 className="font-display text-3xl tracking-tight md:text-4xl">Your profile</h1>
+      <p className="mt-2 text-sm text-muted-foreground md:text-base">
         The source of truth that fuels every résumé. Use the AI bar below to update it — no manual editing.
       </p>
 
-      <div className="mt-10 space-y-6">
+      <div className="mt-8 space-y-4 md:mt-10 md:space-y-6">
         {allEntries.length === 0 && (
           <p className="text-sm text-muted-foreground">No profile data yet. Ask the AI to add some.</p>
         )}
@@ -114,8 +114,8 @@ function ProfilePage() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-      <h2 className="font-display text-xl">{title}</h2>
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-soft md:p-6">
+      <h2 className="font-display text-lg md:text-xl">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -154,7 +154,7 @@ function ValueRenderer({ value }: { value: unknown }) {
     return (
       <div className="space-y-3">
         {value.map((item, i) => (
-          <div key={i} className="rounded-xl border border-border bg-background/50 p-4">
+          <div key={i} className="rounded-xl border border-border bg-background/50 p-3 md:p-4">
             <ValueRenderer value={item} />
           </div>
         ))}
@@ -196,7 +196,7 @@ function AiProfileBar({ busy, onSubmit }: { busy: boolean; onSubmit: (instructio
     setV("");
   }
   return (
-    <div className="fixed inset-x-0 bottom-6 z-30 px-6">
+    <div className="fixed inset-x-0 bottom-4 z-30 px-3 md:bottom-6 md:px-6">
       <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-border bg-background/95 p-2 shadow-soft backdrop-blur focus-within:ring-2 focus-within:ring-ring">
         <Sparkles className="ml-2 mb-2 h-4 w-4 shrink-0 text-accent" />
         <textarea
@@ -209,14 +209,14 @@ function AiProfileBar({ busy, onSubmit }: { busy: boolean; onSubmit: (instructio
             }
           }}
           rows={1}
-          placeholder={busy ? "Updating your profile…" : "Ask AI to update your profile… e.g. ‘add my grade to King's’ or ‘add a senior role at Vercel’"}
+          placeholder={busy ? "Updating your profile…" : "Ask AI to update your profile…"}
           disabled={busy}
           className="max-h-40 flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none placeholder:text-muted-foreground"
         />
         <button
           onClick={send}
           disabled={busy || !v.trim()}
-          className="grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-40"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-40"
           aria-label="Send to AI"
         >
           <ArrowUp className="h-4 w-4" />

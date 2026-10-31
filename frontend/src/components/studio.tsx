@@ -46,9 +46,9 @@ export function Studio({
   return (
     <section className="flex h-full flex-col">
       {/* Top bar: toggle + download */}
-      <div className="relative flex items-center justify-center px-4 pt-3">
+      <div className="relative flex items-center justify-center px-2 pt-2 md:px-4 md:pt-3">
         <IslandToggle value={mode} onChange={setMode} />
-        <div className="absolute right-4 top-3 flex items-center gap-2">
+        <div className="absolute right-2 top-2 flex items-center gap-2 md:right-4 md:top-3">
           <button
             onClick={() => {
               const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
@@ -58,7 +58,7 @@ export function Studio({
               link.click();
               window.setTimeout(() => URL.revokeObjectURL(url), 1000);
             }}
-            className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-xs hover:bg-secondary"
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs hover:bg-secondary md:px-3"
           >
             HTML
           </button>
@@ -66,7 +66,7 @@ export function Studio({
       </div>
 
       {/* Viewer surface */}
-      <div className="relative mx-3 my-3 flex-1 overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
+      <div className="relative mx-2 my-2 flex-1 overflow-hidden rounded-2xl border border-border bg-card shadow-soft md:mx-3 md:my-3">
         <AnimatePresence mode="wait">
           {mode === "code" ? (
             <motion.div
