@@ -1,5 +1,6 @@
-// Lightweight Flask API client. Configure VITE_API_BASE_URL in .env, defaults to localhost:5000.
-export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:5000";
+// Lightweight Flask API client.
+// Falls back to the production Render backend if VITE_API_BASE_URL is not set at build time.
+export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) || "https://resumemaker-n8jk.onrender.com";
 
 const TOKEN_KEY = "rl_token";
 
