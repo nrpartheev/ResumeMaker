@@ -17,11 +17,11 @@ def _find_latex_engine() -> tuple[str, list[str]]:
     # Check for tectonic in the project bin directory (installed during build)
     project_bin = Path(__file__).parent.parent / "bin" / "tectonic"
     if project_bin.exists() and os.access(project_bin, os.X_OK):
-        return str(project_bin), ["-X", "latex"]
+        return str(project_bin), []
 
     # Check for tectonic in PATH
     if shutil.which("tectonic"):
-        return "tectonic", ["-X", "latex"]
+        return "tectonic", []
 
     # Fall back to pdflatex (local dev)
     if shutil.which("pdflatex"):
@@ -66,13 +66,13 @@ def compile_latex(latex_source: str) -> bytes:
         tex_path.write_text(latex_source, encoding="utf-8")
 
         # Build the command — tectonic and pdflatex have different argument styles
-        if engine_path.endswith("tectonic") or "tectonic" in engine_path:
-            # tectonic -X latex main.tex --outdir <tmpdir> --keep-logs
+        if "tectonic" in engine_path:
+            # tectonic main.tex --outdir <tmpdir> --keep-logs --pass <args>
             cmd = [engine_path] + engine_args + [
                 str(tex_path),
                 "--outdir", tmpdir,
                 "--keep-logs",
-                "--pass", "-interaction=nonstopmode",  # pass-through to underlying engine
+                "--pass", "-interaction=nonstopmode",
             ]
         else:
             # pdflatex
