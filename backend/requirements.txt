@@ -6,6 +6,4 @@ PyJWT>=2.8.0
 pymongo>=4.7.0
 openai>=1.0.0
 PyMuPDF>=1.23.0
-pdf2image>=1.17.0
-pytesseract>=0.3.10
 gunicorn>=21.2.0

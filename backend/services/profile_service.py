@@ -8,9 +8,19 @@ import re
 from pathlib import Path
 from openai import OpenAI
 from db import users
-import fitz 
-from pdf2image import convert_from_bytes
-import pytesseract
+import fitz
+
+try:
+    from pdf2image import convert_from_bytes
+    _PDF2IMAGE_AVAILABLE = True
+except ImportError:
+    _PDF2IMAGE_AVAILABLE = False
+
+try:
+    import pytesseract
+    _PYTESSERACT_AVAILABLE = True
+except ImportError:
+    _PYTESSERACT_AVAILABLE = False
 
 
 MAX_PAGES_OCR = 10  
@@ -174,17 +184,13 @@ def extract_text_from_file(file):
             # ----------------------------
             if not text.strip():
 
-                print("No text detected — using OCR fallback")
-
-                images = convert_from_bytes(
-                    pdf_bytes,
-                    dpi=200
-                )
-
-                # Limit OCR pages
-                for img in images[:MAX_PAGES_OCR]:
-
-                    text += pytesseract.image_to_string(img)
+                if _PDF2IMAGE_AVAILABLE and _PYTESSERACT_AVAILABLE:
+                    print("No text detected — using OCR fallback")
+                    images = convert_from_bytes(pdf_bytes, dpi=200)
+                    for img in images[:MAX_PAGES_OCR]:
+                        text += pytesseract.image_to_string(img)
+                else:
+                    print("No text detected — OCR not available on this server")
 
         # ----------------------------
         # TXT / OTHER FILES
