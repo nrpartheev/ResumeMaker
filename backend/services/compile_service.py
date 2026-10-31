@@ -67,12 +67,11 @@ def compile_latex(latex_source: str) -> bytes:
 
         # Build the command — tectonic and pdflatex have different argument styles
         if "tectonic" in engine_path:
-            # tectonic main.tex --outdir <tmpdir> --keep-logs --pass <args>
+            # tectonic main.tex --outdir <tmpdir> --keep-logs
             cmd = [engine_path] + engine_args + [
                 str(tex_path),
                 "--outdir", tmpdir,
                 "--keep-logs",
-                "--pass", "-interaction=nonstopmode",
             ]
         else:
             # pdflatex
