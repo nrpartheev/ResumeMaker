@@ -17,11 +17,11 @@ def _find_latex_engine() -> tuple[str, list[str]]:
     # Check for tectonic in the project bin directory (installed during build)
     project_bin = Path(__file__).parent.parent / "bin" / "tectonic"
     if project_bin.exists() and os.access(project_bin, os.X_OK):
-        return str(project_bin), []
+        return str(project_bin), ["-X", "compile"]
 
     # Check for tectonic in PATH
     if shutil.which("tectonic"):
-        return "tectonic", []
+        return "tectonic", ["-X", "compile"]
 
     # Fall back to pdflatex (local dev)
     if shutil.which("pdflatex"):
@@ -67,15 +67,13 @@ def compile_latex(latex_source: str) -> bytes:
 
         # Build the command — tectonic and pdflatex have different argument styles
         if "tectonic" in engine_path:
-            # tectonic main.tex --outdir <tmpdir> --keep-logs
-            # Set cache dir to project dir so packages persist across requests
-            cache_dir = Path(__file__).parent.parent / ".tectonic-cache"
-            cache_dir.mkdir(exist_ok=True)
+            # tectonic -X compile main.tex --outdir <tmpdir> --keep-logs
+            # Tectonic caches packages automatically in ~/.cache/Tectonic
             cmd = [engine_path] + engine_args + [
                 str(tex_path),
                 "--outdir", tmpdir,
                 "--keep-logs",
-                "--cache", str(cache_dir),
+                "--untrusted",
             ]
         else:
             # pdflatex
