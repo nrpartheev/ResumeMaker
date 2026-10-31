@@ -22,8 +22,8 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Résumé Lab — craft tailored LaTeX résumés" },
-      { name: "description", content: "AI-assisted LaTeX résumé builder. Pick a template, tailor to a JD, edit live, export PDF." },
+      { title: "Résumé Lab — craft tailored résumés" },
+      { name: "description", content: "AI-assisted HTML résumé builder. Pick a template, tailor to a JD, edit live, export PDF." },
       { name: "author", content: "Résumé Lab" },
     ],
     links: [

@@ -16,14 +16,14 @@ function AppIndex() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const [open, setOpen] = useState(!!search.new);
-  const [draftLatex, setDraftLatex] = useState<string | null>(null);
+  const [draftHtml, setDraftHtml] = useState<string | null>(null);
   const [draftId, setDraftId] = useState<string | undefined>(undefined);
 
   useEffect(() => { if (search.new) setOpen(true); }, [search.new]);
 
-  if (draftLatex !== null) {
+  if (draftHtml !== null) {
     return (
-      <Studio resumeId={draftId} initialLatex={draftLatex} />
+      <Studio resumeId={draftId} initialHtml={draftHtml} />
     );
   }
 
@@ -37,7 +37,7 @@ function AppIndex() {
           <Sparkles className="h-5 w-5" />
         </div>
         <h1 className="mt-5 font-display text-3xl tracking-tight">Start a new résumé</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Pick a template, optionally tailor to a job description, and we'll draft your LaTeX.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Pick a template, optionally tailor to a job description, and we'll draft your résumé.</p>
         <button
           onClick={() => setOpen(true)}
           className="mt-6 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
@@ -52,9 +52,9 @@ function AppIndex() {
           setOpen(false);
           if (search.new) navigate({ to: "/app", search: {} as never });
         }}
-        onCreated={({ id, latex }) => {
+        onCreated={({ id, html }) => {
           setDraftId(id);
-          setDraftLatex(latex);
+          setDraftHtml(html);
           if (id) navigate({ to: "/app/$resumeId", params: { resumeId: id } });
         }}
       />

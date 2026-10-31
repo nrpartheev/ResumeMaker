@@ -7,9 +7,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Résumé Lab — tailor your résumé in minutes" },
-      { name: "description", content: "AI-assisted LaTeX résumé editor. Pick a template, tailor to any job description, edit code or PDF live." },
+      { name: "description", content: "AI-assisted HTML résumé editor. Pick a template, tailor to any job description, edit code or preview live." },
       { property: "og:title", content: "Résumé Lab" },
-      { property: "og:description", content: "Craft beautifully typeset LaTeX résumés, tailored to any role." },
+      { property: "og:description", content: "Craft polished HTML résumés, tailored to any role." },
     ],
   }),
   component: Landing,
@@ -43,7 +43,7 @@ function Landing() {
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs uppercase tracking-widest text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            LaTeX, but effortless
+            Résumés, made effortless
           </span>
           <h1 className="mt-6 font-display text-5xl leading-[1.05] tracking-tight md:text-7xl">
             Your résumé,
@@ -51,7 +51,7 @@ function Landing() {
             <span className="italic text-muted-foreground">tailored</span> to every role.
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            Pick a template. Paste a job description. Watch your LaTeX résumé reshape itself —
+            Pick a template. Paste a job description. Watch your résumé reshape itself —
             then edit code or PDF, side by side.
           </p>
 
@@ -75,7 +75,7 @@ function Landing() {
           className="mt-24 grid gap-6 md:grid-cols-3"
         >
           {[
-            { k: "01", t: "Templates that don't look templated", d: "Hand-typeset LaTeX classes. ATS-clean. Editorially calm." },
+            { k: "01", t: "Templates that don't look templated", d: "Clean HTML and CSS. ATS-friendly. Editorially calm." },
             { k: "02", t: "Tailor to any JD", d: "Paste the job description. Get a draft tuned to its language." },
             { k: "03", t: "Code or PDF — your call", d: "An island toggle flips between an editor and the live PDF." },
           ].map((f) => (

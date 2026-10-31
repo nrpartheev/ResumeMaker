@@ -21,7 +21,7 @@ def history_item(resume_id: str):
     doc = resume_service.get_resume(g.user["sub"], resume_id)
     if not doc:
         return jsonify({"error": "Not found"}), 404
-    return jsonify({"latex": doc.get("latex", "")})
+    return jsonify({"html": doc.get("html", "")})
 
 
 @bp.post("/generate")
@@ -38,11 +38,11 @@ def generate():
 def change():
     data = request.get_json(silent=True) or {}
     instruction = str(data.get("instruction") or "")
-    latex = str(data.get("latex") or "")
+    html = str(data.get("html") or "")
     resume_id = data.get("resume_id")
-    if not latex.strip():
-        return jsonify({"error": "Missing latex"}), 400
-    return jsonify(resume_service.apply_change(g.user["sub"], resume_id=resume_id, latex=latex, instruction=instruction))
+    if not html.strip():
+        return jsonify({"error": "Missing html"}), 400
+    return jsonify(resume_service.apply_change(g.user["sub"], resume_id=resume_id, html=html, instruction=instruction))
 
 
 @bp.delete("/history/<resume_id>")

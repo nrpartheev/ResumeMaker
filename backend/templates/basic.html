@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume</title>
+<style>
+  @page { size: letter; margin: 0.5in; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 11pt;
+    color: #222;
+    line-height: 1.4;
+    padding: 0.5in;
+    max-width: 8.5in;
+  }
+  h1 { font-size: 22pt; margin-bottom: 2px; }
+  h2 {
+    font-size: 12pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #ddd;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    padding-bottom: 2px;
+  }
+  .contact { font-size: 10pt; color: #555; margin-bottom: 12px; }
+  .contact span { margin: 0 8px; color: #999; }
+  .entry { margin-bottom: 12px; }
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11pt;
+  }
+  .entry-header .title { font-weight: bold; }
+  .entry-header .date { color: #666; font-size: 10pt; }
+  .entry .subtitle { font-style: italic; color: #555; font-size: 10pt; }
+  .entry ul { margin-left: 16px; margin-top: 4px; }
+  .entry ul li { margin-bottom: 2px; }
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
+  .skills-grid .skill-row { font-size: 10pt; }
+  .skills-grid .skill-row strong { display: inline-block; min-width: 80px; }
+  @media print {
+    body { padding: 0; max-width: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Your Name</h1>
+<div class="contact">
+  <span>email@example.com</span>|<span>+1 (555) 555-5555</span>|<span>City, State</span>
+</div>
+
+<h2>Summary</h2>
+<p>Replace this with your professional summary.</p>
+
+<h2>Experience</h2>
+<div class="entry">
+  <div class="entry-header">
+    <span class="title">Company Name</span>
+    <span class="date">2023 -- Present</span>
+  </div>
+  <div class="subtitle">Job Title &mdash; Location</div>
+  <ul>
+    <li>Impact statement with quantified results.</li>
+    <li>Another achievement bullet point.</li>
+  </ul>
+</div>
+
+<h2>Projects</h2>
+<div class="entry">
+  <div class="entry-header">
+    <span class="title">Project Name</span>
+    <span class="date">2023</span>
+  </div>
+  <ul>
+    <li>Description of the project and your role.</li>
+  </ul>
+</div>
+
+<h2>Education</h2>
+<div class="entry">
+  <div class="entry-header">
+    <span class="title">University Name</span>
+    <span class="date">2018 -- 2022</span>
+  </div>
+  <div class="subtitle">Degree in Field</div>
+</div>
+
+<h2>Skills</h2>
+<div class="skills-grid">
+  <div class="skill-row"><strong>Languages:</strong> Python, JavaScript, HTML/CSS, SQL</div>
+  <div class="skill-row"><strong>Tools:</strong> Git, Docker, AWS, Figma</div>
+</div>
+
+</body>
+</html>

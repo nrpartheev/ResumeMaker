@@ -32,7 +32,7 @@ def _get_client() -> OpenAI:
     return OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=os.getenv("OPENROUTER_API_KEY"),
-        timeout=240.0,  # 4 minutes — AI generation can be slow
+        timeout=240.0,
         max_retries=1,
     )
 
@@ -46,34 +46,31 @@ def _get_profile(user_sub: str) -> dict[str, Any]:
     return profile if isinstance(profile, dict) else {}
 
 
-def _load_template_latex(template_name: str | None) -> str:
-    """Load a template .tex file by its label name (e.g. 'Basic Resume').
-    Falls back to basic.tex if the name isn't found or is None.
+def _load_template_html(template_name: str | None) -> str:
+    """Load a template .html file by its label name (e.g. 'Basic Resume').
+    Falls back to basic.html if the name isn't found or is None.
     """
-    # template.json maps label names → file names
-    template_json_path = TEMPLATES_DIR / "../templates/template.json"
-    fallback = TEMPLATES_DIR / "basic.tex"
+    template_json_path = TEMPLATES_DIR / "template.json"
+    fallback = TEMPLATES_DIR / "basic.html"
 
     if template_name:
         try:
             entries: list[dict] = json.loads(template_json_path.read_text(encoding="utf-8"))
             for entry in entries:
                 if entry.get("name", "").lower() == template_name.lower():
-                    tex_file = TEMPLATES_DIR / entry["file"]
-                    if tex_file.exists():
-                        return tex_file.read_text(encoding="utf-8")
+                    html_file = TEMPLATES_DIR / entry["file"]
+                    if html_file.exists():
+                        return html_file.read_text(encoding="utf-8")
         except Exception:
-            pass  # fall through to default
+            pass
 
     return fallback.read_text(encoding="utf-8")
 
 
-def _strip_latex_fences(text: str) -> str:
+def _strip_html_fences(text: str) -> str:
     """Remove any markdown code fences the model may have added."""
     text = text.strip()
-    # Remove ```latex or ``` at start
     text = re.sub(r"^```[a-zA-Z]*\n?", "", text, flags=re.IGNORECASE)
-    # Remove ``` at end
     text = re.sub(r"\n?```$", "", text)
     return text.strip()
 
@@ -95,7 +92,7 @@ def _call_ai(prompt: str) -> str:
 def list_history(user_sub: str) -> list[dict[str, Any]]:
     cur = (
         resumes()
-        .find({"user_sub": user_sub}, projection={"_id": 0, "latex": 0})
+        .find({"user_sub": user_sub}, projection={"_id": 0, "html": 0})
         .sort("updated_at", -1)
         .limit(50)
     )
@@ -135,26 +132,26 @@ def generate_resume(
     template: str | None = None,
     jd: str | None = None,
 ) -> dict[str, Any]:
-    """Generate a full LaTeX resume using the user's profile + chosen template + optional JD."""
+    """Generate a full HTML resume using the user's profile + chosen template + optional JD."""
 
     profile = _get_profile(user_sub)
-    template_latex = _load_template_latex(template)
+    template_html = _load_template_html(template)
 
     prompt_template = (PROMPTS_DIR / "resumegenerator.md").read_text(encoding="utf-8")
 
     prompt = (
         prompt_template
         .replace("{{USER_PROFILE_JSON}}", json.dumps(profile, indent=2, ensure_ascii=False))
-        .replace("{{TEMPLATE_LATEX}}", template_latex)
+        .replace("{{TEMPLATE_HTML}}", template_html)
         .replace("{{JOB_DESCRIPTION}}", jd or "(none provided)")
     )
 
     raw = _call_ai(prompt)
-    latex = _strip_latex_fences(raw)
+    html = _strip_html_fences(raw)
 
-    # Sanity-check: if the AI returned something that doesn't look like LaTeX, fall back
-    if "\\documentclass" not in latex:
-        latex = template_latex  # return template as-is rather than garbage
+    # Sanity-check: if the AI returned something that doesn't look like HTML, fall back
+    if "<html" not in html.lower() and "<body" not in html.lower():
+        html = template_html
 
     resume_id = _new_id()
     doc = {
@@ -162,12 +159,12 @@ def generate_resume(
         "resume_id": resume_id,
         "title": profile.get("name") or None,
         "template": template,
-        "latex": latex,
+        "html": html,
         "created_at": _now(),
         "updated_at": _now(),
     }
     resumes().insert_one(doc)
-    return {"id": resume_id, "latex": latex}
+    return {"id": resume_id, "html": html}
 
 
 # ---------------------------------------------------------------------------
@@ -177,10 +174,10 @@ def generate_resume(
 def apply_change(
     user_sub: str,
     resume_id: str | None,
-    latex: str,
+    html: str,
     instruction: str,
 ) -> dict[str, Any]:
-    """Apply a natural-language change to existing LaTeX, using the user's profile as context."""
+    """Apply a natural-language change to existing HTML, using the user's profile as context."""
 
     profile = _get_profile(user_sub)
 
@@ -188,23 +185,23 @@ def apply_change(
 
     prompt = (
         prompt_template
-        .replace("{{CURRENT_LATEX}}", latex)
+        .replace("{{CURRENT_HTML}}", html)
         .replace("{{USER_PROFILE_JSON}}", json.dumps(profile, indent=2, ensure_ascii=False))
         .replace("{{INSTRUCTION}}", instruction or "Improve the resume.")
     )
 
     raw = _call_ai(prompt)
-    updated_latex = _strip_latex_fences(raw)
+    updated_html = _strip_html_fences(raw)
 
     # Sanity-check: if the AI returned garbage, keep the original
-    if "\\documentclass" not in updated_latex:
-        updated_latex = latex
+    if "<html" not in updated_html.lower() and "<body" not in updated_html.lower():
+        updated_html = html
 
     if resume_id:
         resumes().update_one(
             {"user_sub": user_sub, "resume_id": resume_id},
-            {"$set": {"latex": updated_latex, "updated_at": _now()}},
+            {"$set": {"html": updated_html, "updated_at": _now()}},
             upsert=False,
         )
 
-    return {"latex": updated_latex}
+    return {"html": updated_html}

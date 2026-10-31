@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Loader2, Sparkles } from "lucide-react";
-import { LatexEditor } from "./latex-editor";
-import { PdfPreview, useLatexBlobUrl } from "./pdf-preview";
+import { Loader2, Sparkles } from "lucide-react";
+import { HtmlEditor } from "./html-editor";
+import { PdfPreview } from "./pdf-preview";
 import { IslandToggle, type IslandMode } from "./island-toggle";
 import { ChangeBar } from "./change-bar";
 import { api } from "@/lib/api";
@@ -10,28 +10,26 @@ import { toast } from "sonner";
 
 export function Studio({
   resumeId,
-  initialLatex,
+  initialHtml,
 }: {
   resumeId?: string;
-  initialLatex: string;
+  initialHtml: string;
 }) {
-  const [latex, setLatex] = useState(initialLatex);
+  const [html, setHtml] = useState(initialHtml);
   const [mode, setMode] = useState<IslandMode>("pdf");
   const [busy, setBusy] = useState(false);
-  const blobUrl = useLatexBlobUrl(latex);
-
-  useEffect(() => { setLatex(initialLatex); }, [initialLatex]);
+  useEffect(() => { setHtml(initialHtml); }, [initialHtml]);
 
   const askChange = useCallback(
     async (instruction: string) => {
       setBusy(true);
       try {
-        const res = await api<{ latex: string }>("/change", {
+        const res = await api<{ html: string }>("/change", {
           method: "POST",
-          json: { instruction, latex, resume_id: resumeId },
+          json: { instruction, html, resume_id: resumeId },
         });
-        if (res?.latex) {
-          setLatex(res.latex);
+        if (res?.html) {
+          setHtml(res.html);
           toast.success("Updated.");
         } else {
           toast.error("Empty response from /change");
@@ -42,7 +40,7 @@ export function Studio({
         setBusy(false);
       }
     },
-    [latex, resumeId]
+    [html, resumeId]
   );
 
   return (
@@ -51,13 +49,19 @@ export function Studio({
       <div className="relative flex items-center justify-center px-4 pt-3">
         <IslandToggle value={mode} onChange={setMode} />
         <div className="absolute right-4 top-3 flex items-center gap-2">
-          <a
-            href={blobUrl}
-            download={`resume-${resumeId ?? "draft"}.tex`}
+          <button
+            onClick={() => {
+              const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = `resume-${resumeId ?? "draft"}.html`;
+              link.click();
+              window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }}
             className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-xs hover:bg-secondary"
           >
-            <Download className="h-3 w-3" /> .tex
-          </a>
+            HTML
+          </button>
         </div>
       </div>
 
@@ -73,7 +77,7 @@ export function Studio({
               transition={{ duration: 0.18 }}
               className="absolute inset-0"
             >
-              <LatexEditor value={latex} onChange={setLatex} readOnly={busy} />
+              <HtmlEditor value={html} onChange={setHtml} readOnly={busy} />
             </motion.div>
           ) : (
             <motion.div
@@ -84,7 +88,7 @@ export function Studio({
               transition={{ duration: 0.18 }}
               className="absolute inset-0"
             >
-              <PdfPreview latex={latex} />
+              <PdfPreview html={html} />
             </motion.div>
           )}
         </AnimatePresence>

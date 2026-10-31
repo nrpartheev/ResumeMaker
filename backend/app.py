@@ -27,7 +27,6 @@ from flask_cors import CORS
 import config
 from db import init_indexes
 from routes.auth_routes import bp as auth_bp
-from routes.compile_routes import bp as compile_bp
 from routes.health_routes import bp as health_bp
 from routes.resume_routes import bp as resume_bp
 from routes.template_routes import bp as template_bp
@@ -53,7 +52,6 @@ def create_app() -> Flask:
         app.logger.warning("MongoDB index init failed: %s", e)
 
     app.register_blueprint(auth_bp)
-    app.register_blueprint(compile_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(resume_bp)
     app.register_blueprint(template_bp)

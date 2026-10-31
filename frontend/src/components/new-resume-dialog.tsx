@@ -8,7 +8,7 @@ export function NewResumeDialog({
 }: {
   open: boolean;
   onClose: () => void;
-  onCreated: (result: { id?: string; latex: string; template: string }) => void;
+  onCreated: (result: { id?: string; html: string; template: string }) => void;
 }) {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -33,11 +33,11 @@ export function NewResumeDialog({
     if (!selected) return toast.error("Pick a template");
     setSubmitting(true);
     try {
-      const res = await api<{ id?: string; latex: string }>("/generate", {
+      const res = await api<{ id?: string; html: string }>("/generate", {
         method: "POST",
         json: { template: selected, jd: jd || undefined },
       });
-      onCreated({ id: res.id, latex: res.latex, template: selected });
+      onCreated({ id: res.id, html: res.html, template: selected });
       onClose();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Generation failed");

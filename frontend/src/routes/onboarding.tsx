@@ -99,7 +99,7 @@ function Onboarding() {
             <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card p-10 text-sm text-muted-foreground hover:bg-secondary">
               <input
                 type="file"
-                accept=".pdf,.doc,.docx,.txt,.tex"
+                accept=".pdf,.doc,.docx,.txt,.html,.htm"
                 className="hidden"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               />

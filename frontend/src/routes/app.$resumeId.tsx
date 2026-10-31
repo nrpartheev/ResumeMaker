@@ -11,31 +11,31 @@ export const Route = createFileRoute("/app/$resumeId")({
 
 function ResumePage() {
   const { resumeId } = Route.useParams();
-  const [latex, setLatex] = useState<string | null>(null);
+  const [html, setHtml] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
-    setLatex(null);
-    api<string | { latex: string }>(`/history/${encodeURIComponent(resumeId)}`)
+    setHtml(null);
+    api<string | { html: string }>(`/history/${encodeURIComponent(resumeId)}`)
       .then((res) => {
         if (!alive) return;
-        const value = typeof res === "string" ? res : (res?.latex ?? "");
-        setLatex(value);
+        const value = typeof res === "string" ? res : (res?.html ?? "");
+        setHtml(value);
       })
       .catch((e) => {
         if (!alive) return;
         toast.error(e instanceof Error ? e.message : "Failed to load résumé");
-        setLatex("");
+        setHtml("");
       });
     return () => { alive = false; };
   }, [resumeId]);
 
-  if (latex === null) {
+  if (html === null) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
       </div>
     );
   }
-  return <Studio resumeId={resumeId} initialLatex={latex} />;
+  return <Studio resumeId={resumeId} initialHtml={html} />;
 }
