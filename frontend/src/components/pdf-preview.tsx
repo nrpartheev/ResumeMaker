@@ -11,20 +11,21 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 // ---------------------------------------------------------------------------
-// WasmTex client-side compilation (pdfLaTeX in browser via WASM)
+// Siglum client-side LaTeX compilation (TeX Live 2025 in WASM)
+// https://github.com/SiglumProject/siglum
 // ---------------------------------------------------------------------------
 
-import { WasmTexCompiler } from "wasmtex/headless";
+import { SiglumCompiler } from "@siglum/engine";
 
-let compilerPromise: Promise<InstanceType<typeof WasmTexCompiler>> | null = null;
+let compilerPromise: Promise<SiglumCompiler> | null = null;
 
-async function getCompiler(): Promise<InstanceType<typeof WasmTexCompiler>> {
+async function getCompiler(): Promise<SiglumCompiler> {
   if (compilerPromise) return compilerPromise;
   compilerPromise = (async () => {
-    const compiler = new WasmTexCompiler({
-      assetBaseUrl: "/",
-      texliveVersion: "2025",
-      files: {},
+    const compiler = new SiglumCompiler({
+      // Use the public CDN — no self-hosting required
+      bundlesUrl: "https://cdn.siglum.org/tl2025/bundles",
+      wasmUrl: "https://cdn.siglum.org/tl2025/busytex.wasm",
     });
     await compiler.init();
     return compiler;
@@ -34,12 +35,11 @@ async function getCompiler(): Promise<InstanceType<typeof WasmTexCompiler>> {
 
 async function compileClientSide(latex: string): Promise<Blob> {
   const compiler = await getCompiler();
-  await compiler.loadProject({ "main.tex": latex });
-  const result = await compiler.compile();
+  const result = await compiler.compile(latex, { engine: "pdflatex" });
   if (result.success && result.pdf) {
     return new Blob([result.pdf as BlobPart], { type: "application/pdf" });
   }
-  throw new Error(result.log?.slice(-2000) || result.errors?.join("\n") || "Compilation failed");
+  throw new Error(result.log?.slice(-2000) || result.error || "Compilation failed");
 }
 
 // ---------------------------------------------------------------------------
