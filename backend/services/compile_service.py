@@ -75,7 +75,7 @@ def compile_latex(latex_source: str) -> bytes:
                 str(tex_path),
                 "--outdir", tmpdir,
                 "--keep-logs",
-                "-c", str(cache_dir),
+                "--cache", str(cache_dir),
             ]
         else:
             # pdflatex
