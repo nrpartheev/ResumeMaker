@@ -32,6 +32,8 @@ def _get_client() -> OpenAI:
     return OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=os.getenv("OPENROUTER_API_KEY"),
+        timeout=240.0,  # 4 minutes — AI generation can be slow
+        max_retries=1,
     )
 
 
